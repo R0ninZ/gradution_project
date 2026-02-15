@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:gradution_project/app/controllers/attendance_controller.dart' show AttendanceController;
 import 'package:gradution_project/app/controllers/forgot_password_controller.dart';
+import 'package:gradution_project/app/controllers/home_controller.dart';
 import 'package:gradution_project/app/controllers/reset_password_controller.dart';
 import 'package:gradution_project/app/controllers/sign_in_controller.dart';
 import 'package:gradution_project/app/controllers/sign_up_controller.dart';
 import 'package:gradution_project/app/controllers/splash_controller.dart';
 import 'package:gradution_project/app/controllers/verfiy_email_controller.dart';
 import 'package:gradution_project/app/services/auth_service.dart';
+import 'package:gradution_project/app/views/ai_buddy_view.dart';
+import 'package:gradution_project/app/views/attendance_view.dart' show AttendanceView;
 import 'package:gradution_project/app/views/forgot_password_view.dart';
 import 'package:gradution_project/app/views/home_view.dart';
 import 'package:gradution_project/app/views/reset_password_view.dart';
+import 'package:gradution_project/app/views/schedule_view.dart';
 
 import 'package:gradution_project/app/views/sign_in_view.dart';
 import 'package:gradution_project/app/views/sign_up_view.dart';
@@ -49,7 +54,13 @@ class MyApp extends StatelessWidget {
       
        initialRoute: '/splash',
   getPages: [
-    GetPage(name: '/home', page: () => const HomeView()),
+    GetPage(
+  name: '/home',
+  page: () => const HomeView(),
+  binding: BindingsBuilder(() {
+    Get.put(HomeController());
+  }),
+),
     GetPage(
       name: '/splash',
       page: () => const SplashScreen(),
@@ -57,7 +68,14 @@ class MyApp extends StatelessWidget {
         Get.put(SplashController());
       }),
     ),
-
+    GetPage(
+          name: '/ai-buddy',
+          page: () => const AIBuddyView(),
+          ),
+          GetPage(
+          name: '/schedule/:level',
+          page: () => const ScheduleView(),
+          ),
     GetPage(
       name: '/login',
       page: () => const SignInView(),
@@ -101,6 +119,13 @@ GetPage(
   transitionDuration: const Duration(milliseconds: 500),
   binding: BindingsBuilder(() {
     Get.put(ResetPasswordController());
+  }),
+),
+GetPage(
+  name: '/attendance',
+  page: () => const AttendanceView(),
+  binding: BindingsBuilder(() {
+    Get.put(AttendanceController());
   }),
 ),
 
