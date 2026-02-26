@@ -16,56 +16,29 @@ class VerifyEmailView extends GetView<VerifyEmailController> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-
-              const Text(
-                'BNU CONNECT',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF00A7E1),
-                  letterSpacing: 1.2,
-                ),
-              ),
-
+              Text('app_name'.tr,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF00A7E1),
+                      letterSpacing: 1.2)),
               const SizedBox(height: 80),
-
               Container(
                 width: 80,
                 height: 80,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00A7E1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.email_outlined,
-                  size: 45,
-                  color: Colors.white,
-                ),
+                    color: const Color(0xFF00A7E1),
+                    borderRadius: BorderRadius.circular(12)),
+                child: const Icon(Icons.email_outlined, size: 45, color: Colors.white),
               ),
-
               const SizedBox(height: 40),
-
-              const Text(
-                'Verify Your Email',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
+              Text('verify_your_email'.tr,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-
-              const Text(
-                'Please enter the 6-digit code sent to your\nemail address.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey,
-                  height: 1.5,
-                ),
-              ),
-
+              Text('verify_email_subtitle'.tr,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.grey, height: 1.5)),
               const SizedBox(height: 40),
-
               GetBuilder<VerifyEmailController>(
                 builder: (c) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -89,27 +62,19 @@ class VerifyEmailView extends GetView<VerifyEmailController> {
                         maxLength: 1,
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         decoration: const InputDecoration(
                           counterText: '',
                           border: InputBorder.none,
                         ),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        onChanged: (value) =>
-                            c.onCodeChanged(value, index),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        onChanged: (value) => c.onCodeChanged(value, index),
                       ),
                     );
                   }),
                 ),
               ),
-
               const SizedBox(height: 32),
-
               SizedBox(
                 width: double.infinity,
                 height: 54,
@@ -117,54 +82,35 @@ class VerifyEmailView extends GetView<VerifyEmailController> {
                   builder: (c) => ElevatedButton(
                     onPressed: c.isLoading ? null : c.submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF003366),
-                    ),
+                        backgroundColor: const Color(0xFF003366)),
                     child: c.isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Continue',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                    ),
+                        : Text('continue_btn'.tr,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 ),
-              
-
+              ),
               const SizedBox(height: 24),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Didn't you receive any code? ",
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  Text('didnt_receive_code'.tr,
+                      style: const TextStyle(color: Colors.grey)),
                   GestureDetector(
                     onTap: controller.resendCode,
-                    child: const Text(
-                      'Resend code',
-                      style: TextStyle(
-                        color: Color(0xFF3F51B5),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: Text('resend_code'.tr,
+                        style: const TextStyle(
+                            color: Color(0xFF3F51B5), fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
-
               const SizedBox(height: 80),
-
               GestureDetector(
                 onTap: () => Get.back(),
-                child: const Text(
-                  'Back to Login',
-                  style: TextStyle(color: Colors.grey),
-                ),
+                child: Text('back_to_login'.tr,
+                    style: const TextStyle(color: Colors.grey)),
               ),
-
               const SizedBox(height: 20),
             ],
           ),
