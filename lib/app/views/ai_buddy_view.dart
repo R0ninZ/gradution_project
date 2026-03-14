@@ -1,61 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../controllers/ai_buddy_controller.dart';
 
-class AIBuddyView extends StatefulWidget {
+class AIBuddyView extends StatelessWidget {
   const AIBuddyView({super.key});
 
   @override
-  State<AIBuddyView> createState() => _AIBuddyViewState();
-}
-
-class _AIBuddyViewState extends State<AIBuddyView> {
-  final TextEditingController _textController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final List<_ChatMessage> _messages = [];
-
-  late final String _returnRoute;
-
-  @override
-  void initState() {
-    super.initState();
-    _returnRoute =
-        (Get.arguments as Map<String, dynamic>?)?['returnRoute'] ?? '/home';
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _sendMessage() {
-    final text = _textController.text.trim();
-    if (text.isEmpty) return;
-
-    setState(() {
-      _messages.add(_ChatMessage(text: text, isUser: true));
-      _messages.add(_ChatMessage(
-        text: "I'm still being set up! Check back soon. 🤖",
-        isUser: false,
-      ));
-    });
-
-    _textController.clear();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = Get.find<AIBuddyController>();
+    final returnRoute =
+        (Get.arguments as Map<String, dynamic>?)?['returnRoute'] ?? '/home';
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -68,147 +23,154 @@ class _AIBuddyViewState extends State<AIBuddyView> {
         child: SafeArea(
           child: Column(
             children: [
-              _topBar(),
+              _TopBar(controller: controller, returnRoute: returnRoute),
               Expanded(
-                child: _messages.isEmpty ? _emptyState() : _messageList(),
+                child: Obx(() {
+                  if (controller.isFetchingId.value) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: Colors.white38),
+                    );
+                  }
+                  return controller.messages.isEmpty
+                      ? _EmptyState()
+                      : _MessageList(controller: controller);
+                }),
               ),
-              _inputBar(),
+              _InputBar(controller: controller),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  // =========================================================
-  // TOP BAR
-  // =========================================================
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.controller, required this.returnRoute});
+  final AIBuddyController controller;
+  final String returnRoute;
 
-  Widget _topBar() {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          _iconButton(
-            icon: Icons.home_rounded,
-            onTap: () => Get.offAllNamed(_returnRoute),
-          ),
+          _IconBtn(icon: Icons.home_rounded, onTap: () => Get.offAllNamed(returnRoute)),
           const Spacer(),
-          // App name — not localized (brand name)
-          const Text(
-            'Echo Mind',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5),
-          ),
+          const Text('Echo Mind',
+              style: TextStyle(color: Colors.white, fontSize: 18,
+                  fontWeight: FontWeight.bold, letterSpacing: 0.5)),
           const Spacer(),
-          _iconButton(
-            icon: Icons.refresh_rounded,
-            onTap: () => setState(() => _messages.clear()),
-          ),
+          _IconBtn(icon: Icons.refresh_rounded, onTap: controller.clearHistory),
         ],
       ),
     );
   }
+}
 
-  Widget _iconButton({required IconData icon, required VoidCallback onTap}) =>
-      GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Colors.white, size: 22),
+class _IconBtn extends StatelessWidget {
+  const _IconBtn({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40, height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
         ),
-      );
+        child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
 
-  // =========================================================
-  // EMPTY STATE  — fully localized
-  // =========================================================
-
-  Widget _emptyState() {
+class _EmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: 72, height: 72,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.white.withOpacity(0.07),
             ),
-            child: const Icon(Icons.smart_toy_rounded,
-                color: Colors.white38, size: 36),
+            child: const Icon(Icons.smart_toy_rounded, color: Colors.white38, size: 36),
           ),
           const SizedBox(height: 20),
-          Text(
-            'what_can_i_help'.tr,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-          ),
+          Text('what_can_i_help'.tr,
+              style: const TextStyle(color: Colors.white, fontSize: 22,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Text(
-            'ask_me_anything'.tr,
-            style: TextStyle(
-                color: Colors.white.withOpacity(0.45), fontSize: 14),
-          ),
+          Text('ask_me_anything'.tr,
+              style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 14)),
         ],
       ),
     );
   }
+}
 
-  // =========================================================
-  // MESSAGE LIST
-  // =========================================================
+class _MessageList extends StatelessWidget {
+  const _MessageList({required this.controller});
+  final AIBuddyController controller;
 
-  Widget _messageList() {
+  @override
+  Widget build(BuildContext context) {
     return ListView.builder(
-      controller: _scrollController,
+      controller: controller.scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: _messages.length,
-      itemBuilder: (_, i) => _messageBubble(_messages[i]),
+      itemCount: controller.messages.length,
+      itemBuilder: (_, i) => _MessageBubble(message: controller.messages[i]),
     );
   }
+}
 
-  Widget _messageBubble(_ChatMessage msg) {
+class _MessageBubble extends StatelessWidget {
+  const _MessageBubble({required this.message});
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
-      alignment: msg.isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 5),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.72,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
         decoration: BoxDecoration(
-          color: msg.isUser
-              ? const Color(0xFF3E82F7)
-              : Colors.white.withOpacity(0.1),
+          color: message.isError
+              ? const Color(0xFF7B2D2D)
+              : message.isUser
+                  ? const Color(0xFF3E82F7)
+                  : Colors.white.withOpacity(0.1),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
             topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(msg.isUser ? 18 : 4),
-            bottomRight: Radius.circular(msg.isUser ? 4 : 18),
+            bottomLeft: Radius.circular(message.isUser ? 18 : 4),
+            bottomRight: Radius.circular(message.isUser ? 4 : 18),
           ),
         ),
-        child: Text(msg.text,
-            style: const TextStyle(
-                color: Colors.white, fontSize: 14, height: 1.4)),
+        child: Text(message.text,
+            style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4)),
       ),
     );
   }
+}
 
-  // =========================================================
-  // INPUT BAR — localized hint
-  // =========================================================
+class _InputBar extends StatelessWidget {
+  const _InputBar({required this.controller});
+  final AIBuddyController controller;
 
-  Widget _inputBar() {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Row(
@@ -219,45 +181,40 @@ class _AIBuddyViewState extends State<AIBuddyView> {
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(25),
-                border:
-                    Border.all(color: Colors.white.withOpacity(0.15)),
+                border: Border.all(color: Colors.white.withOpacity(0.15)),
               ),
               child: TextField(
-                controller: _textController,
-                style:
-                    const TextStyle(color: Colors.white, fontSize: 14),
-                onSubmitted: (_) => _sendMessage(),
+                controller: controller.textController,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                onSubmitted: (_) => controller.sendMessage(),
                 decoration: InputDecoration(
                   hintText: 'message'.tr,
-                  hintStyle: TextStyle(
-                      color: Colors.white.withOpacity(0.4), fontSize: 14),
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 10),
-          GestureDetector(
-            onTap: _sendMessage,
-            child: Container(
-              width: 50,
-              height: 50,
-              decoration: const BoxDecoration(
-                  shape: BoxShape.circle, color: Color(0xFF3E82F7)),
-              child: const Icon(Icons.arrow_upward_rounded,
-                  color: Colors.white, size: 22),
-            ),
-          ),
+          Obx(() => GestureDetector(
+                onTap: controller.sendMessage,
+                child: Container(
+                  width: 50, height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: controller.isLoading.value ? Colors.white24 : const Color(0xFF3E82F7),
+                  ),
+                  child: controller.isLoading.value
+                      ? const Padding(
+                          padding: EdgeInsets.all(14),
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 22),
+                ),
+              )),
         ],
       ),
     );
   }
-}
-
-class _ChatMessage {
-  final String text;
-  final bool isUser;
-  _ChatMessage({required this.text, required this.isUser});
 }

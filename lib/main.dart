@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:gradution_project/app/controllers/ai_buddy_controller.dart';
 import 'package:gradution_project/app/controllers/admin_controller.dart';
 import 'package:gradution_project/app/controllers/community_controller.dart';
 import 'package:gradution_project/app/controllers/forgot_password_controller.dart';
@@ -226,7 +227,16 @@ class MyApp extends StatelessWidget {
           ),
         ),
         GetPage(name: '/ai-buddy-intro', page: () => const AIBuddyIntroView()),
-        GetPage(name: '/ai-buddy', page: () => const AIBuddyView()),
+        GetPage(
+          name: '/ai-buddy',
+          page: () => const AIBuddyView(),
+          binding: BindingsBuilder(
+            () => Get.lazyPut<AIBuddyController>(
+              () => AIBuddyController(),
+              fenix: true,
+            ),
+          ),
+        ),
 
         // ── Admin routes ───────────────────────────────────────────────────
         GetPage(
